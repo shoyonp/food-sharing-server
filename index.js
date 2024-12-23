@@ -29,35 +29,49 @@ async function run() {
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
 
-    //  foods related apis
     const foodsCollection = client.db("tastyFood").collection("foods");
 
-    app.get("/foods", async (req, res) => {
-      const email = req.query.email;
-      let query = email ? { "donator.email": email } : {};
+    // foods related apis
 
-      const cursor = foodsCollection.find(query);
+    // post a data
+    app.post("/foods", async (req, res) => {
+      const formData = req.body;
+      const result = await foodsCollection.insertOne(formData);
+      res.send(result);
+    });
+
+    // get all data
+    app.get("/foods", async (req, res) => {
+      //   const email = req.query.email;
+      //   let query = email ? { "donator.email": email } : {};
+
+      const cursor = foodsCollection.find();
       const result = await cursor.toArray();
       res.send(result);
     });
 
-    // app.get("/foods/:email", async (req, res) => {
-    //   const email = req.params.email;
-    //   const query = { "donator.email": email };
-    //   const result = await foodsCollection.find(query).toArray();
-    //   res.send(result);
-    // });
 
-    app.get("/foods/:id", async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: new ObjectId(id) };
-      const result = await foodsCollection.findOne(query);
+    // get specific users posted data
+    app.get("/foods/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { "donator.email": email };
+      const result = await foodsCollection.find(query).toArray();
       res.send(result);
     });
 
-    app.post("/foods", async (req, res) => {
-      const formData = req.body;
-      const result = await foodsCollection.insertOne(formData);
+    // specific food detail
+    // app.get("/foods/:id", async (req, res) => {
+    //     const id = req.params.id;
+    //     const query = { _id: new ObjectId(id) };
+    //     const result = await foodsCollection.findOne(query);
+    //     res.send(result);
+    //   });
+
+    // delete a data
+    app.delete("/foods/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await foodsCollection.deleteOne(query);
       res.send(result);
     });
   } finally {
