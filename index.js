@@ -33,10 +33,20 @@ async function run() {
     const foodsCollection = client.db("tastyFood").collection("foods");
 
     app.get("/foods", async (req, res) => {
-      const cursor = foodsCollection.find();
+      const email = req.query.email;
+      let query = email ? { "donator.email": email } : {};
+
+      const cursor = foodsCollection.find(query);
       const result = await cursor.toArray();
       res.send(result);
     });
+
+    // app.get("/foods/:email", async (req, res) => {
+    //   const email = req.params.email;
+    //   const query = { "donator.email": email };
+    //   const result = await foodsCollection.find(query).toArray();
+    //   res.send(result);
+    // });
 
     app.get("/foods/:id", async (req, res) => {
       const id = req.params.id;
@@ -50,8 +60,6 @@ async function run() {
       const result = await foodsCollection.insertOne(formData);
       res.send(result);
     });
-
-
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
