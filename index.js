@@ -50,7 +50,6 @@ async function run() {
       res.send(result);
     });
 
-
     // get specific users posted data
     app.get("/foods/:email", async (req, res) => {
       const email = req.params.email;
@@ -59,19 +58,32 @@ async function run() {
       res.send(result);
     });
 
-    // specific food detail
-    // app.get("/foods/:id", async (req, res) => {
-    //     const id = req.params.id;
-    //     const query = { _id: new ObjectId(id) };
-    //     const result = await foodsCollection.findOne(query);
-    //     res.send(result);
-    //   });
-
     // delete a data
     app.delete("/foods/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await foodsCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    // specific food detail
+    app.get("/food/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await foodsCollection.findOne(query);
+      res.send(result);
+    });
+
+    // update a food
+    app.put("/updateFood/:id", async (req, res) => {
+      const id = req.params.id;
+      const formData = req.body;
+      const updated = {
+        $set: formData,
+      };
+      const query = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const result = await foodsCollection.updateOne(query, updated, options);
       res.send(result);
     });
   } finally {
