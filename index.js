@@ -30,10 +30,11 @@ async function run() {
     );
 
     const foodsCollection = client.db("tastyFood").collection("foods");
+    const foodRequestCollection = client.db("tastyFood").collection("request");
 
     // foods related apis
 
-    // post a data
+    // save a food data in db
     app.post("/foods", async (req, res) => {
       const formData = req.body;
       const result = await foodsCollection.insertOne(formData);
@@ -44,7 +45,6 @@ async function run() {
     app.get("/foods", async (req, res) => {
       //   const email = req.query.email;
       //   let query = email ? { "donator.email": email } : {};
-
       const cursor = foodsCollection.find();
       const result = await cursor.toArray();
       res.send(result);
@@ -84,6 +84,33 @@ async function run() {
       const query = { _id: new ObjectId(id) };
       const options = { upsert: true };
       const result = await foodsCollection.updateOne(query, updated, options);
+      res.send(result);
+    });
+
+    // save a food request data in db
+    app.post("/req-food", async (req, res) => {
+      const reqData = req.body;
+      const result = await foodRequestCollection.insertOne(reqData);
+
+      //   update food status
+        const filter = { _id: new ObjectId(reqData.foodId) };
+        const update = {
+          $set: { foodStatus: "requested" },
+        };
+        const updateStatus = await foodsCollection.updateOne(
+          filter,
+          update
+        );
+        console.log(filter);
+      res.send(result);
+    });
+
+    // get specific request data
+    app.get("/my-request/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email };
+      const result = await foodRequestCollection.find(query).toArray();
+      //   console.log(result);
       res.send(result);
     });
   } finally {
