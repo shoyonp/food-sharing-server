@@ -43,9 +43,20 @@ async function run() {
 
     // get all data
     app.get("/foods", async (req, res) => {
+      const { search } = req.query;
+      const { sort } = req.query;
+      let options = {};
+      if (sort) {
+        options = { sort: { expiredDate: sort === "asc" ? 1 : -1 } };
+      }
+      let query = {};
+      if (search) {
+        query = { foodName: { $regex: search, $options: "i" } };
+      }
+
       //   const email = req.query.email;
       //   let query = email ? { "donator.email": email } : {};
-      const cursor = foodsCollection.find();
+      const cursor = foodsCollection.find(query,options);
       const result = await cursor.toArray();
       res.send(result);
     });
@@ -93,15 +104,11 @@ async function run() {
       const result = await foodRequestCollection.insertOne(reqData);
 
       //   update food status
-        const filter = { _id: new ObjectId(reqData.foodId) };
-        const update = {
-          $set: { foodStatus: "requested" },
-        };
-        const updateStatus = await foodsCollection.updateOne(
-          filter,
-          update
-        );
-        console.log(filter);
+      const filter = { _id: new ObjectId(reqData.foodId) };
+      const update = {
+        $set: { foodStatus: "requested" },
+      };
+      const updateStatus = await foodsCollection.updateOne(filter, update);
       res.send(result);
     });
 
